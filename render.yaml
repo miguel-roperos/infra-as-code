@@ -1,4 +1,46 @@
+services:
+  # A static site
+  - type: web
+    name: my blog
+    env: static
+    buildCommand: yarn build
+    staticPublishPath: ./build
+    pullRequestPreviewsEnabled: true # optional
+    buildFilter:
+      paths:
+      - src/**/*.js
+      ignoredPaths:
+      - src/**/*.test.js
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: sameorigin
+    routes:
+      - type: redirect
+        source: /old
+        destination: /new
+      - type: rewrite
+        source: /a/*
+        destination: /a
+  # A Redis instance
+  - type: redis
+    name: lightning
+    ipAllowList: # required
+      - source: 0.0.0.0/0
+        description: everywhere
+    plan: free # optional (defaults to starter)
+    maxmemoryPolicy: noeviction # optional (defaults to allkeys-lru)
+
 databases:
   - name: elephant
     databaseName: mydb # optional (Render may add a suffix)
-    user: miguel # optional
+    user: adrian # optional
+    ipAllowList: # optional (defaults to allow all)
+      - source: 203.0.113.4/30
+        description: office
+      - source: 198.51.100.1
+        description: home
+
+  - name: private database
+    databaseName: private
+    ipAllowList: [] # only allow internal connections
